@@ -1,0 +1,45 @@
+# Build output
+bin/
+obj/
+publish/
+artifacts/
+
+# IDE and editor files
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local environment and secret files
+.env
+.env.local
+appsettings.Local.json
+appsettings.Development.local.json
+Keys/*.key
+
+# Keep sample configuration files
+!.env.example
+!appsettings.Example.json
+
+# Local NuGet output/cache
+packages/
+*.nupkg
+*.snupkg
+
+# Secrets
+Configs/*firebase-adminsdk*.json
+
+# Local settings containing secrets
+appsettings.Local.json
+appsettings.Development.local.json
