@@ -5,33 +5,31 @@ using System.Text.Json;
 
 namespace ChangdaeVinaPurchasingApi.Endpoints;
 
-public static class MaterialEndpoints
+public static class ManufacturerEndpoints
 {
-    public static IEndpointRouteBuilder MapMaterialEndpoints(this IEndpointRouteBuilder app)
+    public static IEndpointRouteBuilder MapManufacturerEndpoints(this IEndpointRouteBuilder app)
     {
-        RouteGroupBuilder group = app.MapGroup("/api/materials")
-            .WithTags("Materials");
+        RouteGroupBuilder group = app.MapGroup("/api/manufacturers")
+            .WithTags("Manufacturers");
 
-        static async Task<IResult> GetAllAsync(MaterialRepository repository)
+        group.MapGet("", async (ManufacturerRepository repository) =>
         {
             return await ApiResponseHelper.HandleAsync(repository.GetAllAsync);
-        }
+        });
 
-        group.MapGet("", GetAllAsync);
-
-        group.MapGet("{id:int}", async (MaterialRepository repository, int id) =>
+        group.MapGet("{id:int}", async (ManufacturerRepository repository, int id) =>
         {
             return await ApiResponseHelper.HandleAsync(() => repository.GetByIdAsync(id));
         });
 
-        group.MapPost("", async (MaterialRepository repository, Dictionary<string, JsonElement> body) =>
+        group.MapPost("", async (ManufacturerRepository repository, Dictionary<string, JsonElement> body) =>
         {
             SqlParameter[] parameters = BuildUpsertParameters(body);
 
             return await ApiResponseHelper.HandleAsync(() => repository.UpsertAsync(parameters));
         });
 
-        group.MapPut("{id:int}", async (MaterialRepository repository, int id, Dictionary<string, JsonElement> body) =>
+        group.MapPut("{id:int}", async (ManufacturerRepository repository, int id, Dictionary<string, JsonElement> body) =>
         {
             SqlParameterHelper.SetInt("Id", body, id);
             SqlParameter[] parameters = BuildUpsertParameters(body);
@@ -39,7 +37,7 @@ public static class MaterialEndpoints
             return await ApiResponseHelper.HandleAsync(() => repository.UpsertAsync(parameters));
         });
 
-        group.MapDelete("{id:int}", async (MaterialRepository repository, int id, int userId) =>
+        group.MapDelete("{id:int}", async (ManufacturerRepository repository, int id, int userId) =>
         {
             return await ApiResponseHelper.HandleAsync(() => repository.DeleteAsync(id, userId));
         });
@@ -53,15 +51,15 @@ public static class MaterialEndpoints
         [
             SqlParameterHelper.NullableInt("Id", body, -1),
             SqlParameterHelper.NullableInt("UserId", body, 0),
-            SqlParameterHelper.Int("MaterialTypeId", body),
-            SqlParameterHelper.String("Code", body),
             SqlParameterHelper.String("Name", body),
-            SqlParameterHelper.NullableString("Unit", body),
-            SqlParameterHelper.NullableString("Specification", body),
-            SqlParameterHelper.NullableString("Description", body),
-            SqlParameterHelper.NullableDecimal("DefaultPrice", body, 0),
-            SqlParameterHelper.Decimal("MinimumStock", body),
-            SqlParameterHelper.Decimal("CurrentStock", body),
+            SqlParameterHelper.NullableString("Code", body),
+            SqlParameterHelper.NullableString("Phone", body),
+            SqlParameterHelper.NullableString("Email", body),
+            SqlParameterHelper.NullableString("Address", body),
+            SqlParameterHelper.NullableString("TaxCode", body),
+            SqlParameterHelper.NullableString("ContactPerson", body),
+            SqlParameterHelper.NullableString("BankAccount", body),
+            SqlParameterHelper.NullableString("BankName", body),
             SqlParameterHelper.NullableBool("IsActive", body)
         ];
     }

@@ -72,10 +72,9 @@ public static class StockOutDetailEndpoints
             SqlParameterHelper.NullableInt("Id", body, -1),
             SqlParameterHelper.NullableInt("UserId", body, 0),
             SqlParameterHelper.NullableInt("StockOutId", body),
-            SqlParameterHelper.NullableInt("SupplierId", body),
+            SqlParameterHelper.NullableInt("Manufacturerid", body),
             SqlParameterHelper.NullableInt("MaterialId", body),
             SqlParameterHelper.NullableDecimal("Qty", body),
-            SqlParameterHelper.NullableDecimal("UnitPrice", body),
             SqlParameterHelper.NullableString("Note", body)
         ];
     }

@@ -1,4 +1,4 @@
-# Build output
+﻿# Build output
 bin/
 obj/
 publish/
@@ -43,3 +43,17 @@ Configs/*firebase-adminsdk*.json
 # Local settings containing secrets
 appsettings.Local.json
 appsettings.Development.local.json
+
+# GitHubSimpleUploader
+appsettings.Development.json
+node_modules/
+dist/
+
+# Secret files
+appsettings.json
+credentials.json
+service-account.json
+*.pfx
+*.key
+Keys/**/*.key
+Keys/**/*.pfx

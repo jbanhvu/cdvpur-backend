@@ -113,11 +113,11 @@ public static class SqlParameterHelper
         throw new ArgumentException($"Field '{name}' must be a decimal number.");
     }
 
-    public static SqlParameter NullableDecimal(string name, IReadOnlyDictionary<string, JsonElement> body)
+    public static SqlParameter NullableDecimal(string name, IReadOnlyDictionary<string, JsonElement> body, decimal? defaultValue = null)
     {
         if (!TryGetValue(name, body, out JsonElement value) || IsEmptyValue(value))
         {
-            return new SqlParameter($"@{name}", DBNull.Value);
+            return new SqlParameter($"@{name}", defaultValue ?? (object)DBNull.Value);
         }
 
         if (value.ValueKind == JsonValueKind.Number && value.TryGetDecimal(out decimal number))

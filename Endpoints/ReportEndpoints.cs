@@ -24,6 +24,39 @@ public static class ReportEndpoints
             return await ApiResponseHelper.HandleAsync(() => repository.GetInventoryReportAsync(year, month));
         });
 
+        group.MapPost("stock-in-details", async (InventoryReportRepository repository, Dictionary<string, JsonElement> body) =>
+        {
+            DateTime fromDate = GetRequiredDate(body, "FromDate");
+            DateTime toDate = GetRequiredDate(body, "ToDate");
+            int? materialId = GetOptionalInt(body, "MaterialId");
+            int? manufacturerid = GetOptionalInt(body, "Manufacturerid");
+            int? supplierId = GetOptionalInt(body, "SupplierId");
+
+            if (fromDate.Date > toDate.Date)
+            {
+                throw new ArgumentException("Field 'fromDate' must be less than or equal to 'toDate'.");
+            }
+
+            return await ApiResponseHelper.HandleAsync(() =>
+                repository.GetStockInDetailReportAsync(fromDate, toDate, materialId, manufacturerid, supplierId));
+        });
+
+        group.MapPost("stock-out-details", async (InventoryReportRepository repository, Dictionary<string, JsonElement> body) =>
+        {
+            DateTime fromDate = GetRequiredDate(body, "FromDate");
+            DateTime toDate = GetRequiredDate(body, "ToDate");
+            int? materialId = GetOptionalInt(body, "MaterialId");
+            int? manufacturerid = GetOptionalInt(body, "Manufacturerid");
+
+            if (fromDate.Date > toDate.Date)
+            {
+                throw new ArgumentException("Field 'fromDate' must be less than or equal to 'toDate'.");
+            }
+
+            return await ApiResponseHelper.HandleAsync(() =>
+                repository.GetStockOutDetailReportAsync(fromDate, toDate, materialId, manufacturerid));
+        });
+
         group.MapPost("employee-leave-summary", async (EmployeeLeaveRepository repository, Dictionary<string, JsonElement> body) =>
         {
             DateTime fromDate = GetRequiredDate(body, "FromDate");
@@ -78,6 +111,45 @@ public static class ReportEndpoints
         }
 
         throw new ArgumentException($"Field '{name}' must be an integer.");
+    }
+
+    private static int? GetOptionalInt(IReadOnlyDictionary<string, JsonElement> body, string name)
+    {
+        foreach (KeyValuePair<string, JsonElement> item in body)
+        {
+            if (!string.Equals(item.Key, name, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            if (item.Value.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined)
+            {
+                return null;
+            }
+
+            if (item.Value.ValueKind == JsonValueKind.Number && item.Value.TryGetInt32(out int number))
+            {
+                return number;
+            }
+
+            if (item.Value.ValueKind == JsonValueKind.String)
+            {
+                string? value = item.Value.GetString();
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    return null;
+                }
+
+                if (int.TryParse(value, out number))
+                {
+                    return number;
+                }
+            }
+
+            break;
+        }
+
+        return null;
     }
 
     private static DateTime GetRequiredDate(IReadOnlyDictionary<string, JsonElement> body, string name)

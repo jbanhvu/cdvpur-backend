@@ -53,12 +53,12 @@ public static class UserEndpoints
                     SqlParameterHelper.Int("UserId", body),
                     SqlParameterHelper.String("FullName", body),
                     SqlParameterHelper.String("Username", body),
-                    SqlParameterHelper.String("PasswordHash", body),
+                    SqlParameterHelper.NullableString("PasswordHash", body),
                     SqlParameterHelper.String("Phone", body),
                     SqlParameterHelper.String("Email", body),
                     SqlParameterHelper.Int("RoleID", body),
                     SqlParameterHelper.String("RoleName", body),
-                    SqlParameterHelper.Int("BranchId", body),
+                    SqlParameterHelper.NullableInt("BranchId", body),
                     SqlParameterHelper.Bool("IsActive", body),
                     SqlParameterHelper.String("AvatarUrl", body)
             ];
@@ -75,12 +75,12 @@ public static class UserEndpoints
                     SqlParameterHelper.Int("UserId", body),
                     SqlParameterHelper.String("FullName", body),
                     SqlParameterHelper.String("Username", body),
-                    SqlParameterHelper.String("PasswordHash", body),
+                    SqlParameterHelper.NullableString("PasswordHash", body),
                     SqlParameterHelper.String("Phone", body),
                     SqlParameterHelper.String("Email", body),
                     SqlParameterHelper.Int("RoleID", body),
                     SqlParameterHelper.String("RoleName", body),
-                    SqlParameterHelper.Int("BranchId", body),
+                    SqlParameterHelper.NullableInt("BranchId", body),
                     SqlParameterHelper.Bool("IsActive", body),
                     SqlParameterHelper.String("AvatarUrl", body)
             ];

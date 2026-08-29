@@ -39,6 +39,7 @@ BEGIN
         [Unit] NVARCHAR(50) NULL,
         [Specification] NVARCHAR(500) NULL,
         [Description] NVARCHAR(500) NULL,
+        [DefaultPrice] DECIMAL(18,2) NOT NULL CONSTRAINT [DF_CDV_Material_DefaultPrice] DEFAULT ((0)),
         [MinimumStock] DECIMAL(18,2) NOT NULL CONSTRAINT [DF_CDV_Material_MinimumStock] DEFAULT ((0)),
         [CurrentStock] DECIMAL(18,2) NOT NULL CONSTRAINT [DF_CDV_Material_CurrentStock] DEFAULT ((0)),
         [IsActive] BIT NOT NULL CONSTRAINT [DF_CDV_Material_IsActive] DEFAULT ((1)),
@@ -51,6 +52,14 @@ BEGIN
         CONSTRAINT [FK_CDV_Material_MaterialType]
             FOREIGN KEY ([MaterialTypeId]) REFERENCES [nhvpa3en_vpa01].[CDV_MaterialType] ([Id])
     );
+END
+GO
+
+IF COL_LENGTH(N'nhvpa3en_vpa01.CDV_Material', N'DefaultPrice') IS NULL
+BEGIN
+    ALTER TABLE [nhvpa3en_vpa01].[CDV_Material]
+    ADD [DefaultPrice] DECIMAL(18,2) NOT NULL
+        CONSTRAINT [DF_CDV_Material_DefaultPrice] DEFAULT ((0)) WITH VALUES;
 END
 GO
 
@@ -232,6 +241,7 @@ ALTER PROCEDURE [nhvpa3en_vpa01].[CDV_Material_Upsert]
     @Unit NVARCHAR(50) = NULL,
     @Specification NVARCHAR(500) = NULL,
     @Description NVARCHAR(500) = NULL,
+    @DefaultPrice DECIMAL(18,2) = 0,
     @MinimumStock DECIMAL(18,2) = 0,
     @CurrentStock DECIMAL(18,2) = 0,
     @IsActive BIT = NULL
@@ -278,6 +288,7 @@ BEGIN
                 Unit,
                 Specification,
                 Description,
+                DefaultPrice,
                 MinimumStock,
                 CurrentStock,
                 IsActive,
@@ -291,6 +302,7 @@ BEGIN
                 @Unit,
                 @Specification,
                 @Description,
+                ISNULL(@DefaultPrice, 0),
                 @MinimumStock,
                 @CurrentStock,
                 ISNULL(@IsActive, 1),
@@ -309,6 +321,7 @@ BEGIN
                 Unit = @Unit,
                 Specification = @Specification,
                 Description = @Description,
+                DefaultPrice = ISNULL(@DefaultPrice, 0),
                 MinimumStock = @MinimumStock,
                 CurrentStock = @CurrentStock,
                 IsActive = ISNULL(@IsActive, IsActive),

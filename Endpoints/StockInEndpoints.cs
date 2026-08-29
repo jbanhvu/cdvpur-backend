@@ -54,6 +54,7 @@ public static class StockInEndpoints
             SqlParameterHelper.NullableString("StockInNo", body),
             SqlParameterHelper.DateTime("StockInDate", body),
             SqlParameterHelper.NullableInt("SupplierId", body),
+            SqlParameterHelper.NullableInt("Manufacturerid", body),
             SqlParameterHelper.NullableInt("PurchaseOrderId", body),
             SqlParameterHelper.String("Status", body),
             SqlParameterHelper.NullableString("Note", body)

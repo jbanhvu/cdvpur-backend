@@ -469,27 +469,6 @@ BEGIN
         WHERE u.Username = @Username
           AND u.PasswordHash = @PasswordHash;
 
-        IF OBJECT_ID(N'[nhvpa3en_vpa01].[Sol_AuditLog]', N'U') IS NOT NULL
-        BEGIN
-            INSERT INTO [nhvpa3en_vpa01].[Sol_AuditLog]
-            (
-                UserId,
-                TableName,
-                ActionType,
-                RecordId,
-                NewData,
-                CreatedAt
-            )
-            SELECT
-                u.Id,
-                'CDV_User',
-                'LOGIN',
-                u.Id,
-                @Username,
-                GETDATE()
-            FROM [nhvpa3en_vpa01].[CDV_User] u
-            WHERE u.Username = @Username;
-        END
     END TRY
     BEGIN CATCH
         SELECT CAST(0 AS BIT) AS IsSuccess, ERROR_NUMBER() AS ErrCode, ERROR_MESSAGE() AS ErrMsg;
@@ -507,12 +486,12 @@ CREATE PROCEDURE [nhvpa3en_vpa01].[CDV_User_Upsert]
     @UserId INT = 0,
     @FullName NVARCHAR(200),
     @Username VARCHAR(100),
-    @PasswordHash VARCHAR(500),
+    @PasswordHash VARCHAR(500) = NULL,
     @Phone VARCHAR(20),
     @Email VARCHAR(100),
     @RoleID INT,
     @RoleName VARCHAR(100),
-    @BranchId INT,
+    @BranchId INT = NULL,
     @IsActive BIT,
     @AvatarUrl NVARCHAR(500)
 )
@@ -554,27 +533,6 @@ BEGIN
 
             SET @Id = SCOPE_IDENTITY();
 
-            IF OBJECT_ID(N'[nhvpa3en_vpa01].[Sol_AuditLog]', N'U') IS NOT NULL
-            BEGIN
-                INSERT INTO [nhvpa3en_vpa01].[Sol_AuditLog]
-                (
-                    UserId,
-                    TableName,
-                    ActionType,
-                    RecordId,
-                    NewData,
-                    CreatedAt
-                )
-                VALUES
-                (
-                    @UserId,
-                    'CDV_User',
-                    'INSERT',
-                    @Id,
-                    @Username,
-                    GETDATE()
-                );
-            END
         END
         ELSE
         BEGIN
@@ -582,37 +540,16 @@ BEGIN
             SET
                 FullName = @FullName,
                 Username = @Username,
-                PasswordHash = @PasswordHash,
+                PasswordHash = COALESCE(NULLIF(LTRIM(RTRIM(@PasswordHash)), ''), PasswordHash),
                 Phone = @Phone,
                 Email = @Email,
                 RoleId = @RoleID,
                 RoleName = @RoleName,
-                BranchId = @BranchId,
+                BranchId = COALESCE(@BranchId, BranchId),
                 IsActive = @IsActive,
                 AvatarUrl = @AvatarUrl
             WHERE Id = @Id;
 
-            IF OBJECT_ID(N'[nhvpa3en_vpa01].[Sol_AuditLog]', N'U') IS NOT NULL
-            BEGIN
-                INSERT INTO [nhvpa3en_vpa01].[Sol_AuditLog]
-                (
-                    UserId,
-                    TableName,
-                    ActionType,
-                    RecordId,
-                    NewData,
-                    CreatedAt
-                )
-                VALUES
-                (
-                    @UserId,
-                    'CDV_User',
-                    'UPDATE',
-                    @Id,
-                    @Username,
-                    GETDATE()
-                );
-            END
         END
 
         COMMIT TRAN;
@@ -673,28 +610,6 @@ BEGIN
         SET PasswordHash = @NewPasswordHash
         WHERE Id = @UserId;
 
-        IF OBJECT_ID(N'[nhvpa3en_vpa01].[Sol_AuditLog]', N'U') IS NOT NULL
-        BEGIN
-            INSERT INTO [nhvpa3en_vpa01].[Sol_AuditLog]
-            (
-                UserId,
-                TableName,
-                ActionType,
-                RecordId,
-                NewData,
-                CreatedAt
-            )
-            VALUES
-            (
-                @UserId,
-                'CDV_User',
-                'CHANGE_PASSWORD',
-                @UserId,
-                'Password changed',
-                GETDATE()
-            );
-        END
-
         COMMIT TRAN;
 
         SELECT @UserId AS ID, 0 AS ErrCode, 'SUCCESS' AS ErrMsg;
@@ -725,26 +640,6 @@ BEGIN
 
         DELETE FROM [nhvpa3en_vpa01].[CDV_User]
         WHERE Id = @Id;
-
-        IF OBJECT_ID(N'[nhvpa3en_vpa01].[Sol_AuditLog]', N'U') IS NOT NULL
-        BEGIN
-            INSERT INTO [nhvpa3en_vpa01].[Sol_AuditLog]
-            (
-                UserId,
-                TableName,
-                ActionType,
-                RecordId,
-                CreatedAt
-            )
-            VALUES
-            (
-                @UserId,
-                'CDV_User',
-                'DELETE',
-                @Id,
-                GETDATE()
-            );
-        END
 
         COMMIT TRAN;
 

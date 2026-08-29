@@ -52,12 +52,82 @@ public class NaverWorksSyncResult
     public bool Success => Failed == 0;
     public int TotalDocuments { get; set; }
     public int LeaveDocuments { get; set; }
+    public int BusinessTripDocuments { get; set; }
+    public int HiringDocuments { get; set; }
+    public int ExitPermissionDocuments { get; set; }
+    public int CompanyVisitorDocuments { get; set; }
+    public int PurchaseRequestDocuments { get; set; }
+    public int PurchaseDocuments { get; set; }
     public int Synced { get; set; }
     public int Failed { get; set; }
     public List<string> Errors { get; set; } = [];
 }
 
+public class NaverWorksSyncAllResult
+{
+    public bool Success => Failed == 0;
+    public string Type { get; set; } = string.Empty;
+    public int TotalDocuments { get; set; }
+    public int MatchedDocuments { get; set; }
+    public int Synced { get; set; }
+    public int Failed { get; set; }
+    public Dictionary<string, NaverWorksSyncTypeResult> Results { get; set; } = [];
+}
+
+public class NaverWorksSyncTypeResult
+{
+    public bool Success => Failed == 0;
+    public string Type { get; set; } = string.Empty;
+    public int Documents { get; set; }
+    public int Synced { get; set; }
+    public int Failed { get; set; }
+    public List<string> Errors { get; set; } = [];
+}
+
+public class SyncNaverWorksRequest
+{
+    public string Type { get; set; } = string.Empty;
+    public DateTime FromDate { get; set; }
+    public DateTime UntilDate { get; set; }
+}
+
 public class SyncLeaveRequest
+{
+    public DateTime FromDate { get; set; }
+    public DateTime UntilDate { get; set; }
+}
+
+public class SyncPurchaseRequestRequest
+{
+    public DateTime FromDate { get; set; }
+    public DateTime UntilDate { get; set; }
+}
+
+public class SyncPurchaseRequest
+{
+    public DateTime FromDate { get; set; }
+    public DateTime UntilDate { get; set; }
+}
+
+public class SyncBusinessTripRequest
+{
+    public DateTime FromDate { get; set; }
+    public DateTime UntilDate { get; set; }
+}
+
+public class SyncHiringRequest
+{
+    public DateTime FromDate { get; set; }
+    public DateTime UntilDate { get; set; }
+}
+
+public class SyncExitPermissionRequest
+{
+    public DateTime FromDate { get; set; }
+    public DateTime UntilDate { get; set; }
+}
+
+public class SyncCompanyVisitorRequest
 {
     public DateTime FromDate { get; set; }
     public DateTime UntilDate { get; set; }

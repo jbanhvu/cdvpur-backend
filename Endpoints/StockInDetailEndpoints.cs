@@ -72,6 +72,7 @@ public static class StockInDetailEndpoints
             SqlParameterHelper.NullableInt("Id", body, -1),
             SqlParameterHelper.NullableInt("UserId", body, 0),
             SqlParameterHelper.Int("StockInId", body),
+            SqlParameterHelper.NullableInt("Manufacturerid", body),
             SqlParameterHelper.Int("MaterialId", body),
             SqlParameterHelper.Decimal("Qty", body),
             SqlParameterHelper.NullableDecimal("UnitPrice", body),
