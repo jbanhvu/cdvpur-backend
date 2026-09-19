@@ -24,21 +24,7 @@ public static class ProductEndpoints
 
         group.MapPost("", async (ProductRepository repository, Dictionary<string, JsonElement> body) =>
         {
-            SqlParameter[] parameters =
-            [
-                    SqlParameterHelper.Int("Id", body),
-                    SqlParameterHelper.Int("UserId", body),
-                    SqlParameterHelper.Int("CategoryId", body),
-                    SqlParameterHelper.String("Name", body),
-                    SqlParameterHelper.String("SKU", body),
-                    SqlParameterHelper.String("Barcode", body),
-                    SqlParameterHelper.Decimal("Price", body),
-                    SqlParameterHelper.Decimal("CostPrice", body),
-                    SqlParameterHelper.Int("StockQuantity", body),
-                    SqlParameterHelper.Int("WarrantyMonths", body),
-                    SqlParameterHelper.String("Description", body),
-                    SqlParameterHelper.Bool("IsActive", body)
-            ];
+            SqlParameter[] parameters = BuildUpsertParameters(body);
 
             return await ApiResponseHelper.HandleAsync(() => repository.UpsertAsync(parameters));
         });
@@ -46,21 +32,7 @@ public static class ProductEndpoints
         group.MapPut("{id:int}", async (ProductRepository repository, int id, Dictionary<string, JsonElement> body) =>
         {
             SqlParameterHelper.SetInt("Id", body, id);
-            SqlParameter[] parameters =
-            [
-                    SqlParameterHelper.Int("Id", body),
-                    SqlParameterHelper.Int("UserId", body),
-                    SqlParameterHelper.Int("CategoryId", body),
-                    SqlParameterHelper.String("Name", body),
-                    SqlParameterHelper.String("SKU", body),
-                    SqlParameterHelper.String("Barcode", body),
-                    SqlParameterHelper.Decimal("Price", body),
-                    SqlParameterHelper.Decimal("CostPrice", body),
-                    SqlParameterHelper.Int("StockQuantity", body),
-                    SqlParameterHelper.Int("WarrantyMonths", body),
-                    SqlParameterHelper.String("Description", body),
-                    SqlParameterHelper.Bool("IsActive", body)
-            ];
+            SqlParameter[] parameters = BuildUpsertParameters(body);
 
             return await ApiResponseHelper.HandleAsync(() => repository.UpsertAsync(parameters));
         });
@@ -71,5 +43,17 @@ public static class ProductEndpoints
         });
 
         return app;
+    }
+
+    private static SqlParameter[] BuildUpsertParameters(Dictionary<string, JsonElement> body)
+    {
+        return
+        [
+            SqlParameterHelper.NullableInt("Id", body, -1),
+            SqlParameterHelper.NullableInt("UserId", body, 0),
+            SqlParameterHelper.String("Code", body),
+            SqlParameterHelper.NullableString("Name", body),
+            SqlParameterHelper.NullableBool("IsActive", body)
+        ];
     }
 }

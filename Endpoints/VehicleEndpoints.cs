@@ -5,31 +5,31 @@ using System.Text.Json;
 
 namespace ChangdaeVinaPurchasingApi.Endpoints;
 
-public static class CustomerEndpoints
+public static class VehicleEndpoints
 {
-    public static IEndpointRouteBuilder MapCustomerEndpoints(this IEndpointRouteBuilder app)
+    public static IEndpointRouteBuilder MapVehicleEndpoints(this IEndpointRouteBuilder app)
     {
-        RouteGroupBuilder group = app.MapGroup("/api/customers")
-            .WithTags("Customers");
+        RouteGroupBuilder group = app.MapGroup("/api/vehicles")
+            .WithTags("Vehicles");
 
-        group.MapGet("", async (CustomerRepository repository) =>
+        group.MapGet("", async (VehicleRepository repository) =>
         {
             return await ApiResponseHelper.HandleAsync(repository.GetAllAsync);
         });
 
-        group.MapGet("{id:int}", async (CustomerRepository repository, int id) =>
+        group.MapGet("{id:int}", async (VehicleRepository repository, int id) =>
         {
             return await ApiResponseHelper.HandleAsync(() => repository.GetByIdAsync(id));
         });
 
-        group.MapPost("", async (CustomerRepository repository, Dictionary<string, JsonElement> body) =>
+        group.MapPost("", async (VehicleRepository repository, Dictionary<string, JsonElement> body) =>
         {
             SqlParameter[] parameters = BuildUpsertParameters(body);
 
             return await ApiResponseHelper.HandleAsync(() => repository.UpsertAsync(parameters));
         });
 
-        group.MapPut("{id:int}", async (CustomerRepository repository, int id, Dictionary<string, JsonElement> body) =>
+        group.MapPut("{id:int}", async (VehicleRepository repository, int id, Dictionary<string, JsonElement> body) =>
         {
             SqlParameterHelper.SetInt("Id", body, id);
             SqlParameter[] parameters = BuildUpsertParameters(body);
@@ -37,7 +37,7 @@ public static class CustomerEndpoints
             return await ApiResponseHelper.HandleAsync(() => repository.UpsertAsync(parameters));
         });
 
-        group.MapDelete("{id:int}", async (CustomerRepository repository, int id, int userId) =>
+        group.MapDelete("{id:int}", async (VehicleRepository repository, int id, int userId) =>
         {
             return await ApiResponseHelper.HandleAsync(() => repository.DeleteAsync(id, userId));
         });
@@ -51,9 +51,8 @@ public static class CustomerEndpoints
         [
             SqlParameterHelper.NullableInt("Id", body, -1),
             SqlParameterHelper.NullableInt("UserId", body, 0),
-            SqlParameterHelper.String("Code", body),
-            SqlParameterHelper.String("Name", body),
-            SqlParameterHelper.NullableString("Address", body),
+            SqlParameterHelper.String("VehicleNo", body),
+            SqlParameterHelper.NullableString("DefaultDriverName", body),
             SqlParameterHelper.NullableBool("IsActive", body)
         ];
     }

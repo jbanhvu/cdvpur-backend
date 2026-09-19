@@ -15,6 +15,50 @@ public class NaverWorksSyncService
     private const string TimeUsedComponentId = "1ccae4ee-9ea0-b5eb-1f14-3eacf6a18546";
     private const string DeductHoursComponentId = "0d3cc565-077f-fe1c-0bd2-74be443fe28d";
     private const string ReasonComponentId = "b4f34a15-6fc8-81a1-5266-4d317cf5ad82";
+    private static readonly string[] PurchaseDetailItemNameAliases =
+    [
+        "ItemName",
+        "Item",
+        "Description",
+        "\uD488\uBAA9",
+        "70afc78c-52a8-2116-c0bd-528c4d45455c",
+        "54c5c9c7-528c-8d6c-ed65-5aad90961fc4"
+    ];
+    private static readonly string[] PurchaseDetailSupplierNameAliases =
+    [
+        "SupplierName",
+        "Supplier",
+        "Vendor",
+        "\uC5C5\uCCB4",
+        "5a84c483-d2a4-e6ea-733e-8869cd1801e4",
+        "1968bb18-939a-b29d-c4e6-21d972f582ee"
+    ];
+    private static readonly string[] PurchaseDetailAmountAliases =
+    [
+        "Amount",
+        "TotalAmount",
+        "\uAE08\uC561",
+        "\uAE08\uC561(VND)",
+        "3a0a3a00-56b2-6051-1776-c64c8ccb0830",
+        "ebe7194c-e55c-8648-d570-9ffa8185ec03"
+    ];
+    private static readonly string[] PurchaseDetailDeliveryAliases =
+    [
+        "Delivery",
+        "DeliveryDate",
+        "\uB0A9\uAE30",
+        "5f7bf329-76e4-699f-fa3a-afdf845e291f",
+        "aeb0774e-67c9-8058-59f5-69688af08bdb"
+    ];
+    private static readonly string[] PurchaseDetailNoteAliases =
+    [
+        "Note",
+        "Remark",
+        "Remarks",
+        "\uBE44\uACE0",
+        "722561bb-1817-f807-ef99-8b0ea2e595b2",
+        "112ffab3-312a-8d8e-f469-325ca03f3b9e"
+    ];
 
     private readonly NaverWorksApprovalService _approvalService;
     private readonly IConfiguration _configuration;
@@ -1464,12 +1508,11 @@ public class NaverWorksSyncService
         List<NaverWorksDocumentComponent> components,
         NaverWorksOptions options)
     {
-        if (string.IsNullOrWhiteSpace(options.PurchaseComparisonTableComponentId))
-        {
-            return;
-        }
+        NaverWorksDocumentComponent? component = string.IsNullOrWhiteSpace(options.PurchaseComparisonTableComponentId)
+            ? null
+            : FindComponent(components, options.PurchaseComparisonTableComponentId);
+        component ??= FindPurchaseComparisonTableComponent(components, options);
 
-        NaverWorksDocumentComponent? component = FindComponent(components, options.PurchaseComparisonTableComponentId);
         if (component is null ||
             !TryGetProperty(component.ComponentValue, "table", out JsonElement tableValue) ||
             !TryGetProperty(tableValue, "headers", out JsonElement headers) ||
@@ -1497,7 +1540,12 @@ public class NaverWorksSyncService
                 continue;
             }
 
-            string? itemName = ReadTableCellString(cellDatas, columnIndexes, options.PurchaseDetailItemNameKey);
+            string? itemName = ReadTableCellString(
+                cellDatas,
+                columnIndexes,
+                0,
+                options.PurchaseDetailItemNameKey,
+                PurchaseDetailItemNameAliases);
             if (string.IsNullOrWhiteSpace(itemName))
             {
                 continue;
@@ -1506,12 +1554,67 @@ public class NaverWorksSyncService
             details.Add(new ParsedPurchaseDetailBody
             {
                 ItemName = itemName,
-                SupplierName = ReadTableCellString(cellDatas, columnIndexes, options.PurchaseDetailSupplierNameKey),
-                Amount = ReadTableCellDecimal(cellDatas, columnIndexes, options.PurchaseDetailAmountKey),
-                Delivery = ReadTableCellString(cellDatas, columnIndexes, options.PurchaseDetailDeliveryKey),
-                Note = ReadTableCellString(cellDatas, columnIndexes, options.PurchaseDetailNoteKey)
+                SupplierName = ReadTableCellString(
+                    cellDatas,
+                    columnIndexes,
+                    1,
+                    options.PurchaseDetailSupplierNameKey,
+                    PurchaseDetailSupplierNameAliases),
+                Amount = ReadTableCellDecimal(
+                    cellDatas,
+                    columnIndexes,
+                    4,
+                    options.PurchaseDetailAmountKey,
+                    PurchaseDetailAmountAliases),
+                Delivery = ReadTableCellString(
+                    cellDatas,
+                    columnIndexes,
+                    5,
+                    options.PurchaseDetailDeliveryKey,
+                    PurchaseDetailDeliveryAliases),
+                Note = ReadTableCellString(
+                    cellDatas,
+                    columnIndexes,
+                    6,
+                    options.PurchaseDetailNoteKey,
+                    PurchaseDetailNoteAliases)
             });
         }
+    }
+
+    private static NaverWorksDocumentComponent? FindPurchaseComparisonTableComponent(
+        List<NaverWorksDocumentComponent> components,
+        NaverWorksOptions options)
+    {
+        foreach (NaverWorksDocumentComponent component in components)
+        {
+            if (!TryGetProperty(component.ComponentValue, "table", out JsonElement tableValue) ||
+                !TryGetProperty(tableValue, "headers", out JsonElement headers) ||
+                !TryGetProperty(tableValue, "rowDatas", out JsonElement rowDatas) ||
+                headers.ValueKind != JsonValueKind.Array ||
+                rowDatas.ValueKind != JsonValueKind.Array)
+            {
+                continue;
+            }
+
+            Dictionary<string, int> columnIndexes = [];
+            int index = 0;
+            foreach (JsonElement header in headers.EnumerateArray())
+            {
+                AddColumnIndex(columnIndexes, ReadString(header, "cellId"), index);
+                AddColumnIndex(columnIndexes, ReadString(header, "cellName"), index);
+                index++;
+            }
+
+            if (HasAnyColumn(columnIndexes, options.PurchaseDetailItemNameKey, PurchaseDetailItemNameAliases) &&
+                HasAnyColumn(columnIndexes, options.PurchaseDetailSupplierNameKey, PurchaseDetailSupplierNameAliases) &&
+                HasAnyColumn(columnIndexes, options.PurchaseDetailAmountKey, PurchaseDetailAmountAliases))
+            {
+                return component;
+            }
+        }
+
+        return null;
     }
 
     private static void FillPurchaseRequestLinks(
@@ -1579,6 +1682,70 @@ public class NaverWorksSyncService
         return decimal.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal number)
             ? number
             : null;
+    }
+
+    private static string? ReadTableCellString(
+        JsonElement cellDatas,
+        Dictionary<string, int> columnIndexes,
+        int fallbackIndex,
+        string configuredKey,
+        IEnumerable<string> aliases)
+    {
+        string? value = ReadTableCellString(cellDatas, columnIndexes, configuredKey);
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            return value;
+        }
+
+        foreach (string alias in aliases)
+        {
+            value = ReadTableCellString(cellDatas, columnIndexes, alias);
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                return value;
+            }
+        }
+
+        return ReadTableCellString(cellDatas, fallbackIndex);
+    }
+
+    private static decimal? ReadTableCellDecimal(
+        JsonElement cellDatas,
+        Dictionary<string, int> columnIndexes,
+        int fallbackIndex,
+        string configuredKey,
+        IEnumerable<string> aliases)
+    {
+        string? text = ReadTableCellString(cellDatas, columnIndexes, fallbackIndex, configuredKey, aliases);
+        return decimal.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal number)
+            ? number
+            : null;
+    }
+
+    private static string? ReadTableCellString(JsonElement cellDatas, int index)
+    {
+        if (index < 0 || index >= cellDatas.GetArrayLength())
+        {
+            return null;
+        }
+
+        JsonElement cell = cellDatas[index];
+        return TryGetProperty(cell, "value", out JsonElement value)
+            ? ReadFlexibleString(value)
+            : ReadFlexibleString(cell);
+    }
+
+    private static bool HasAnyColumn(
+        Dictionary<string, int> columnIndexes,
+        string configuredKey,
+        IEnumerable<string> aliases)
+    {
+        if (!string.IsNullOrWhiteSpace(configuredKey) && columnIndexes.ContainsKey(configuredKey))
+        {
+            return true;
+        }
+
+        return aliases.Any(alias => !string.IsNullOrWhiteSpace(alias) && columnIndexes.ContainsKey(alias));
     }
 
     private static IEnumerable<JsonElement> ReadRows(JsonElement value)
