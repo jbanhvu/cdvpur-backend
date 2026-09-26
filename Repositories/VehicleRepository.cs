@@ -30,6 +30,14 @@ public class VehicleRepository : BaseRepository
             parameters);
     }
 
+    public async Task<List<Dictionary<string, object?>>> BulkUpsertAsync(int userId, string vehiclesJson)
+    {
+        return await ExecuteStoredProcedureAsync(
+            "nhvpa3en_vpa01.CDV_Vehicle_BulkUpsert",
+            new SqlParameter("@UserId", userId),
+            new SqlParameter("@VehiclesJson", vehiclesJson));
+    }
+
     public async Task<List<Dictionary<string, object?>>> DeleteAsync(int id, int userId)
     {
         return await ExecuteStoredProcedureAsync(

@@ -47,6 +47,7 @@ BEGIN
     (
         [Id] INT IDENTITY(1,1) NOT NULL,
         [BranchId] INT NULL,
+        [DepartmentId] INT NULL,
         [RoleId] INT NULL,
         [Username] VARCHAR(100) NOT NULL,
         [PasswordHash] VARCHAR(500) NOT NULL,
@@ -60,6 +61,13 @@ BEGIN
         CONSTRAINT [PK_CDV_User] PRIMARY KEY CLUSTERED ([Id] ASC),
         CONSTRAINT [UQ_CDV_User_Username] UNIQUE ([Username])
     );
+END
+GO
+
+IF COL_LENGTH(N'[nhvpa3en_vpa01].[CDV_User]', 'DepartmentId') IS NULL
+BEGIN
+    ALTER TABLE [nhvpa3en_vpa01].[CDV_User]
+        ADD [DepartmentId] INT NULL;
 END
 GO
 
@@ -91,6 +99,27 @@ BEGIN
     ALTER TABLE [nhvpa3en_vpa01].[CDV_User]
         ADD CONSTRAINT [FK_CDV_User_Role]
         FOREIGN KEY ([RoleId]) REFERENCES [nhvpa3en_vpa01].[CDV_Role] ([Id]);
+END
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = N'FK_CDV_User_Departmant')
+    AND OBJECT_ID(N'[nhvpa3en_vpa01].[CDV_Departmant]', N'U') IS NOT NULL
+    AND NOT EXISTS
+    (
+        SELECT 1
+        FROM [nhvpa3en_vpa01].[CDV_User] u
+        WHERE u.DepartmentId IS NOT NULL
+          AND NOT EXISTS
+          (
+              SELECT 1
+              FROM [nhvpa3en_vpa01].[CDV_Departmant] d
+              WHERE d.Id = u.DepartmentId
+          )
+    )
+BEGIN
+    ALTER TABLE [nhvpa3en_vpa01].[CDV_User]
+        ADD CONSTRAINT [FK_CDV_User_Departmant]
+        FOREIGN KEY ([DepartmentId]) REFERENCES [nhvpa3en_vpa01].[CDV_Departmant] ([Id]);
 END
 GO
 
@@ -395,9 +424,21 @@ BEGIN
     SET NOCOUNT ON;
 
     IF @Id = 0
-        SELECT * FROM [nhvpa3en_vpa01].[CDV_User] ORDER BY Id DESC;
+        SELECT
+            u.*,
+            d.Name AS DepartmentName,
+            d.Code AS DepartmentCode
+        FROM [nhvpa3en_vpa01].[CDV_User] u
+        LEFT JOIN [nhvpa3en_vpa01].[CDV_Departmant] d ON d.Id = u.DepartmentId
+        ORDER BY u.Id DESC;
     ELSE
-        SELECT * FROM [nhvpa3en_vpa01].[CDV_User] WHERE Id = @Id;
+        SELECT
+            u.*,
+            d.Name AS DepartmentName,
+            d.Code AS DepartmentCode
+        FROM [nhvpa3en_vpa01].[CDV_User] u
+        LEFT JOIN [nhvpa3en_vpa01].[CDV_Departmant] d ON d.Id = u.DepartmentId
+        WHERE u.Id = @Id;
 END
 GO
 
@@ -456,6 +497,9 @@ BEGIN
             'SUCCESS' AS ErrMsg,
             u.Id,
             u.BranchId,
+            u.DepartmentId,
+            d.Name AS DepartmentName,
+            d.Code AS DepartmentCode,
             u.RoleId,
             u.RoleName,
             u.Username,
@@ -466,6 +510,7 @@ BEGIN
             u.CreatedAt,
             u.AvatarUrl
         FROM [nhvpa3en_vpa01].[CDV_User] u
+        LEFT JOIN [nhvpa3en_vpa01].[CDV_Departmant] d ON d.Id = u.DepartmentId
         WHERE u.Username = @Username
           AND u.PasswordHash = @PasswordHash;
 
@@ -492,6 +537,7 @@ CREATE PROCEDURE [nhvpa3en_vpa01].[CDV_User_Upsert]
     @RoleID INT,
     @RoleName VARCHAR(100),
     @BranchId INT = NULL,
+    @DepartmentId INT = NULL,
     @IsActive BIT,
     @AvatarUrl NVARCHAR(500)
 )
@@ -514,6 +560,7 @@ BEGIN
                 RoleID,
                 RoleName,
                 BranchId,
+                DepartmentId,
                 IsActive,
                 AvatarUrl
             )
@@ -527,6 +574,7 @@ BEGIN
                 @RoleID,
                 @RoleName,
                 @BranchId,
+                @DepartmentId,
                 @IsActive,
                 @AvatarUrl
             );
@@ -546,6 +594,7 @@ BEGIN
                 RoleId = @RoleID,
                 RoleName = @RoleName,
                 BranchId = COALESCE(@BranchId, BranchId),
+                DepartmentId = @DepartmentId,
                 IsActive = @IsActive,
                 AvatarUrl = @AvatarUrl
             WHERE Id = @Id;

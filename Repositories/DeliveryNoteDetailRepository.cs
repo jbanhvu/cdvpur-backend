@@ -49,6 +49,13 @@ public class DeliveryNoteDetailRepository : BaseRepository
             new SqlParameter("@DetailsJson", detailsJson));
     }
 
+    public async Task<List<Dictionary<string, object?>>> GetDeliveredQuantityByDOAsync(string doListJson)
+    {
+        return await ExecuteStoredProcedureAsync(
+            "nhvpa3en_vpa01.CDV_DeliveryNoteDetail_DeliveredQuantityByDO_Select",
+            new SqlParameter("@DOListJson", doListJson));
+    }
+
     public async Task<List<Dictionary<string, object?>>> DeleteAsync(int id, int userId)
     {
         return await ExecuteStoredProcedureAsync(

@@ -23,6 +23,13 @@ public class UserRepository : BaseRepository
             new SqlParameter("@Id", id));
     }
 
+    public async Task<List<Dictionary<string, object?>>> GetByDepartmentCodeAsync(string departmentCode)
+    {
+        return await ExecuteStoredProcedureAsync(
+            "CDV_User_SelectByDepartmentCode",
+            new SqlParameter("@DepartmentCode", departmentCode));
+    }
+
     public async Task<List<Dictionary<string, object?>>> UpsertAsync(params SqlParameter[] parameters)
     {
         return await ExecuteStoredProcedureAsync(

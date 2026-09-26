@@ -22,4 +22,11 @@ public class PurchaseRequestRepository : BaseRepository
             "CDV_PurchaseRequest_Select",
             new SqlParameter("@Id", id));
     }
+
+    public async Task<List<Dictionary<string, object?>>> GetByDepartmentNameAsync(string? departmentName)
+    {
+        return await ExecuteStoredProcedureAsync(
+            "CDV_PurchaseRequest_SelectByDepartmentName",
+            new SqlParameter("@DepartmentName", string.IsNullOrWhiteSpace(departmentName) ? DBNull.Value : departmentName));
+    }
 }

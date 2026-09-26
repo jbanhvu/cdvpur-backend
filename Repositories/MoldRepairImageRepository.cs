@@ -1,0 +1,42 @@
+using ChangdaeVinaPurchasingApi.Base;
+using Microsoft.Data.SqlClient;
+
+namespace ChangdaeVinaPurchasingApi.Repositories;
+
+public class MoldRepairImageRepository : BaseRepository
+{
+    public MoldRepairImageRepository(IConfiguration configuration) : base(configuration)
+    {
+    }
+
+    public async Task<List<Dictionary<string, object?>>> GetAllAsync(int? id, int? moldRepairLogId)
+    {
+        return await ExecuteStoredProcedureAsync(
+            "nhvpa3en_vpa01.CDV_MoldRepairImage_Select",
+            new SqlParameter("@Id", (object?)id ?? -1),
+            new SqlParameter("@MoldRepairLogId", (object?)moldRepairLogId ?? DBNull.Value));
+    }
+
+    public async Task<List<Dictionary<string, object?>>> GetByMoldRepairLogIdAsync(int moldRepairLogId)
+    {
+        return await ExecuteStoredProcedureAsync(
+            "nhvpa3en_vpa01.CDV_MoldRepairImage_Select",
+            new SqlParameter("@Id", -1),
+            new SqlParameter("@MoldRepairLogId", moldRepairLogId));
+    }
+
+    public async Task<List<Dictionary<string, object?>>> UpsertAsync(params SqlParameter[] parameters)
+    {
+        return await ExecuteStoredProcedureAsync(
+            "nhvpa3en_vpa01.CDV_MoldRepairImage_Upsert",
+            parameters);
+    }
+
+    public async Task<List<Dictionary<string, object?>>> DeleteAsync(int id, int userId)
+    {
+        return await ExecuteStoredProcedureAsync(
+            "nhvpa3en_vpa01.CDV_MoldRepairImage_Delete",
+            new SqlParameter("@Id", id),
+            new SqlParameter("@UserId", userId));
+    }
+}

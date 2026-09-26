@@ -70,6 +70,7 @@ builder.Services.AddScoped<CustomerRepository>();
 builder.Services.AddScoped<DepartmantRepository>();
 builder.Services.AddScoped<DeliveryNoteRepository>();
 builder.Services.AddScoped<DeliveryNoteDetailRepository>();
+builder.Services.AddScoped<DeliveryItemRepository>();
 builder.Services.AddScoped<DictionaryRepository>();
 builder.Services.AddScoped<EmployeeLeaveRepository>();
 builder.Services.AddScoped<EnrollmentRepository>();
@@ -95,6 +96,8 @@ builder.Services.AddScoped<MaterialRepository>();
 builder.Services.AddScoped<MaterialTypeRepository>();
 builder.Services.AddScoped<ManufacturerRepository>();
 builder.Services.AddScoped<MoldRepository>();
+builder.Services.AddScoped<MoldRepairImageRepository>();
+builder.Services.AddScoped<MoldRepairLogRepository>();
 builder.Services.AddScoped<NewsRepository>();
 builder.Services.AddScoped<NewsCategoryRepository>();
 builder.Services.AddScoped<NotificationRepository>();
@@ -224,6 +227,7 @@ app.MapCustomerEndpoints();
 app.MapDepartmantEndpoints();
 app.MapDeliveryNoteEndpoints();
 app.MapDeliveryNoteDetailEndpoints();
+app.MapDeliveryItemEndpoints();
 app.MapDictionaryEndpoints();
 app.MapEnrollmentEndpoints();
 app.MapEnrollmentScheduleEndpoints();
@@ -248,6 +252,8 @@ app.MapMaterialEndpoints();
 app.MapMaterialTypeEndpoints();
 app.MapManufacturerEndpoints();
 app.MapMoldEndpoints();
+app.MapMoldRepairImageEndpoints();
+app.MapMoldRepairLogEndpoints();
 app.MapNewsEndpoints();
 app.MapNewsCategoryEndpoints();
 app.MapNotificationTypeEndpoints();
@@ -302,5 +308,7 @@ static bool IsAllowedCorsOrigin(string? origin)
     return uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) ||
         uri.Host.Equals("127.0.0.1", StringComparison.OrdinalIgnoreCase) ||
         uri.Host.Equals("vpatek.com", StringComparison.OrdinalIgnoreCase) ||
-        uri.Host.EndsWith(".vpatek.com", StringComparison.OrdinalIgnoreCase);
+        uri.Host.EndsWith(".vpatek.com", StringComparison.OrdinalIgnoreCase) ||
+        uri.Host.Equals("changdaevina.com", StringComparison.OrdinalIgnoreCase) ||
+        uri.Host.EndsWith(".changdaevina.com", StringComparison.OrdinalIgnoreCase);
 }

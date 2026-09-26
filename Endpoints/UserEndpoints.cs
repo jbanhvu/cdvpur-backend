@@ -22,6 +22,11 @@ public static class UserEndpoints
             return await ApiResponseHelper.HandleAsync(() => repository.GetByIdAsync(id));
         });
 
+        group.MapGet("by-department-code/{departmentCode}", async (UserRepository repository, string departmentCode) =>
+        {
+            return await ApiResponseHelper.HandleAsync(() => repository.GetByDepartmentCodeAsync(departmentCode));
+        });
+
         group.MapPost("login", async (UserRepository repository, Dictionary<string, JsonElement> body) =>
         {
             SqlParameter[] parameters =
@@ -59,6 +64,7 @@ public static class UserEndpoints
                     SqlParameterHelper.Int("RoleID", body),
                     SqlParameterHelper.String("RoleName", body),
                     SqlParameterHelper.NullableInt("BranchId", body),
+                    SqlParameterHelper.NullableInt("DepartmentId", body),
                     SqlParameterHelper.Bool("IsActive", body),
                     SqlParameterHelper.String("AvatarUrl", body)
             ];
@@ -81,6 +87,7 @@ public static class UserEndpoints
                     SqlParameterHelper.Int("RoleID", body),
                     SqlParameterHelper.String("RoleName", body),
                     SqlParameterHelper.NullableInt("BranchId", body),
+                    SqlParameterHelper.NullableInt("DepartmentId", body),
                     SqlParameterHelper.Bool("IsActive", body),
                     SqlParameterHelper.String("AvatarUrl", body)
             ];

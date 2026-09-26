@@ -47,6 +47,8 @@ public static class DeliveryNoteEndpoints
             SqlParameterHelper.Date("DeliveryDate", body),
             SqlParameterHelper.Int("CustomerId", body),
             SqlParameterHelper.NullableInt("VehicleId", body),
+            SqlParameterHelper.NullableString("DriverName", body),
+            SqlParameterHelper.NullableString("TagRfid", body),
             SqlParameterHelper.NullableString("ReceiverName", body),
             SqlParameterHelper.NullableInt("TotalQuantity", body),
             SqlParameterHelper.NullableString("Remark", body),

@@ -37,6 +37,19 @@ public static class VehicleEndpoints
             return await ApiResponseHelper.HandleAsync(() => repository.UpsertAsync(parameters));
         });
 
+        group.MapPost("bulk", async (VehicleRepository repository, Dictionary<string, JsonElement> body) =>
+        {
+            int userId = GetOptionalInt(body, "UserId", 0);
+            JsonElement vehicles = GetRequired(body, "Vehicles");
+
+            if (vehicles.ValueKind != JsonValueKind.Array)
+            {
+                throw new ArgumentException("Field 'Vehicles' must be an array.");
+            }
+
+            return await ApiResponseHelper.HandleAsync(() => repository.BulkUpsertAsync(userId, vehicles.GetRawText()));
+        });
+
         group.MapDelete("{id:int}", async (VehicleRepository repository, int id, int userId) =>
         {
             return await ApiResponseHelper.HandleAsync(() => repository.DeleteAsync(id, userId));
@@ -53,7 +66,45 @@ public static class VehicleEndpoints
             SqlParameterHelper.NullableInt("UserId", body, 0),
             SqlParameterHelper.String("VehicleNo", body),
             SqlParameterHelper.NullableString("DefaultDriverName", body),
+            SqlParameterHelper.NullableDecimal("LoadCapacity", body),
+            SqlParameterHelper.NullableString("TagRfid", body),
             SqlParameterHelper.NullableBool("IsActive", body)
         ];
+    }
+
+    private static JsonElement GetRequired(IReadOnlyDictionary<string, JsonElement> body, string name)
+    {
+        foreach (KeyValuePair<string, JsonElement> item in body)
+        {
+            if (string.Equals(item.Key, name, StringComparison.OrdinalIgnoreCase))
+            {
+                return item.Value;
+            }
+        }
+
+        throw new ArgumentException($"Missing required field '{name}'.");
+    }
+
+    private static int GetOptionalInt(IReadOnlyDictionary<string, JsonElement> body, string name, int defaultValue)
+    {
+        foreach (KeyValuePair<string, JsonElement> item in body)
+        {
+            if (!string.Equals(item.Key, name, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            if (item.Value.ValueKind == JsonValueKind.Number && item.Value.TryGetInt32(out int value))
+            {
+                return value;
+            }
+
+            if (item.Value.ValueKind == JsonValueKind.String && int.TryParse(item.Value.GetString(), out value))
+            {
+                return value;
+            }
+        }
+
+        return defaultValue;
     }
 }

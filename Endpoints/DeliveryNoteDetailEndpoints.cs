@@ -55,6 +55,18 @@ public static class DeliveryNoteDetailEndpoints
             return await ApiResponseHelper.HandleAsync(() => repository.BulkSaveAsync(deliveryNoteId, userId, details.GetRawText()));
         });
 
+        group.MapPost("delivered-quantity-by-do", async (DeliveryNoteDetailRepository repository, Dictionary<string, JsonElement> body) =>
+        {
+            JsonElement doList = GetRequiredAny(body, "DOList", "Deliveries", "DELIVERY");
+
+            if (doList.ValueKind != JsonValueKind.Array)
+            {
+                throw new ArgumentException("Field 'DOList' must be an array.");
+            }
+
+            return await ApiResponseHelper.HandleAsync(() => repository.GetDeliveredQuantityByDOAsync(doList.GetRawText()));
+        });
+
         group.MapDelete("{id:int}", async (DeliveryNoteDetailRepository repository, int id, int userId) =>
         {
             return await ApiResponseHelper.HandleAsync(() => repository.DeleteAsync(id, userId));
@@ -70,12 +82,17 @@ public static class DeliveryNoteDetailEndpoints
             SqlParameterHelper.NullableInt("Id", body, -1),
             SqlParameterHelper.Int("DeliveryNoteId", body),
             SqlParameterHelper.NullableInt("Seq", body),
+            SqlParameterHelper.NullableInt("PackingGroupNo", body),
+            SqlParameterHelper.NullableString("DELIVERY_Line", body),
+            SqlParameterHelper.NullableInt("Item_No", body),
             SqlParameterHelper.Int("ProductId", body),
             SqlParameterHelper.Int("Quantity", body),
+            SqlParameterHelper.NullableString("PackType", body),
+            SqlParameterHelper.NullableInt("QuantityPerPack", body),
             SqlParameterHelper.NullableString("DeliveryTime", body),
             SqlParameterHelper.NullableString("TrolleyBox", body),
-            SqlParameterHelper.NullableString("DeliveryTag", body),
-            SqlParameterHelper.NullableString("RFIDTag", body),
+            SqlParameterHelper.NullableString("DELIVERY", body),
+            SqlParameterHelper.NullableString("DELIVERY_LOCATION", body),
             SqlParameterHelper.NullableString("Remark", body)
         ];
     }
@@ -91,6 +108,22 @@ public static class DeliveryNoteDetailEndpoints
         }
 
         throw new ArgumentException($"Missing required field '{name}'.");
+    }
+
+    private static JsonElement GetRequiredAny(IReadOnlyDictionary<string, JsonElement> body, params string[] names)
+    {
+        foreach (string name in names)
+        {
+            foreach (KeyValuePair<string, JsonElement> item in body)
+            {
+                if (string.Equals(item.Key, name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return item.Value;
+                }
+            }
+        }
+
+        throw new ArgumentException($"Missing required field '{names[0]}'.");
     }
 
     private static int GetOptionalInt(IReadOnlyDictionary<string, JsonElement> body, string name, int defaultValue)
