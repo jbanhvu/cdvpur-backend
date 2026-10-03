@@ -12,6 +12,13 @@ BEGIN
 END;
 GO
 
+IF COL_LENGTH(N'nhvpa3en_vpa01.CDV_Vehicle', N'DefaultDriverPhone') IS NULL
+BEGIN
+    ALTER TABLE [nhvpa3en_vpa01].[CDV_Vehicle]
+    ADD [DefaultDriverPhone] VARCHAR(20) NULL;
+END;
+GO
+
 IF COL_LENGTH(N'nhvpa3en_vpa01.CDV_DeliveryNote', N'DriverName') IS NULL
 BEGIN
     ALTER TABLE [nhvpa3en_vpa01].[CDV_DeliveryNote]
@@ -23,6 +30,20 @@ IF COL_LENGTH(N'nhvpa3en_vpa01.CDV_DeliveryNote', N'TagRfid') IS NULL
 BEGIN
     ALTER TABLE [nhvpa3en_vpa01].[CDV_DeliveryNote]
     ADD [TagRfid] VARCHAR(100) NULL;
+END;
+GO
+
+IF COL_LENGTH(N'nhvpa3en_vpa01.CDV_DeliveryNote', N'DriverPhone') IS NULL
+BEGIN
+    ALTER TABLE [nhvpa3en_vpa01].[CDV_DeliveryNote]
+    ADD [DriverPhone] VARCHAR(20) NULL;
+END;
+GO
+
+IF COL_LENGTH(N'nhvpa3en_vpa01.CDV_DeliveryNote', N'InvoiceNo') IS NULL
+BEGIN
+    ALTER TABLE [nhvpa3en_vpa01].[CDV_DeliveryNote]
+    ADD [InvoiceNo] VARCHAR(50) NULL;
 END;
 GO
 
@@ -444,6 +465,7 @@ BEGIN
         Id,
         VehicleNo,
         DefaultDriverName,
+        DefaultDriverPhone,
         LoadCapacity,
         TagRfid,
         IsActive
@@ -461,6 +483,7 @@ ALTER PROCEDURE [nhvpa3en_vpa01].[CDV_Vehicle_Upsert]
     @UserId INT = 0,
     @VehicleNo VARCHAR(50),
     @DefaultDriverName NVARCHAR(100) = NULL,
+    @DefaultDriverPhone VARCHAR(20) = NULL,
     @LoadCapacity DECIMAL(5,1) = NULL,
     @TagRfid VARCHAR(100) = NULL,
     @IsActive BIT = 1
@@ -474,6 +497,7 @@ BEGIN
         (
             VehicleNo,
             DefaultDriverName,
+            DefaultDriverPhone,
             LoadCapacity,
             TagRfid,
             IsActive
@@ -482,6 +506,7 @@ BEGIN
         (
             @VehicleNo,
             @DefaultDriverName,
+            @DefaultDriverPhone,
             @LoadCapacity,
             @TagRfid,
             ISNULL(@IsActive, 1)
@@ -495,6 +520,7 @@ BEGIN
         SET
             VehicleNo = @VehicleNo,
             DefaultDriverName = @DefaultDriverName,
+            DefaultDriverPhone = @DefaultDriverPhone,
             LoadCapacity = @LoadCapacity,
             TagRfid = @TagRfid,
             IsActive = ISNULL(@IsActive, IsActive)
@@ -549,6 +575,7 @@ BEGIN
         (
             VehicleNo VARCHAR(50) NOT NULL,
             DefaultDriverName NVARCHAR(100) NULL,
+            DefaultDriverPhone VARCHAR(20) NULL,
             LoadCapacity DECIMAL(5,1) NULL,
             TagRfid VARCHAR(100) NULL,
             IsActive BIT NULL
@@ -558,6 +585,7 @@ BEGIN
         (
             VehicleNo,
             DefaultDriverName,
+            DefaultDriverPhone,
             LoadCapacity,
             TagRfid,
             IsActive
@@ -570,6 +598,10 @@ BEGIN
             COALESCE(
                 JSON_VALUE([value], '$.defaultDriverName'),
                 JSON_VALUE([value], '$.DefaultDriverName')
+            ),
+            COALESCE(
+                JSON_VALUE([value], '$.defaultDriverPhone'),
+                JSON_VALUE([value], '$.DefaultDriverPhone')
             ),
             COALESCE(
                 TRY_CONVERT(DECIMAL(5,1), JSON_VALUE([value], '$.loadCapacity')),
@@ -617,6 +649,7 @@ BEGIN
         UPDATE target
         SET
             DefaultDriverName = source.DefaultDriverName,
+            DefaultDriverPhone = source.DefaultDriverPhone,
             LoadCapacity = source.LoadCapacity,
             TagRfid = source.TagRfid,
             IsActive = ISNULL(source.IsActive, target.IsActive)
@@ -628,6 +661,7 @@ BEGIN
         (
             VehicleNo,
             DefaultDriverName,
+            DefaultDriverPhone,
             LoadCapacity,
             TagRfid,
             IsActive
@@ -636,6 +670,7 @@ BEGIN
         SELECT
             source.VehicleNo,
             source.DefaultDriverName,
+            source.DefaultDriverPhone,
             source.LoadCapacity,
             source.TagRfid,
             ISNULL(source.IsActive, 1)
@@ -682,10 +717,13 @@ BEGIN
         dn.VehicleId,
         v.VehicleNo,
         v.DefaultDriverName,
+        v.DefaultDriverPhone,
         v.LoadCapacity,
         v.TagRfid AS VehicleTagRfid,
         dn.DriverName,
+        dn.DriverPhone,
         dn.TagRfid,
+        dn.InvoiceNo,
         dn.ReceiverName,
         dn.TotalQuantity,
         dn.Remark,
@@ -711,7 +749,9 @@ ALTER PROCEDURE [nhvpa3en_vpa01].[CDV_DeliveryNote_Upsert]
     @CustomerId INT,
     @VehicleId INT = NULL,
     @DriverName NVARCHAR(100) = NULL,
+    @DriverPhone VARCHAR(20) = NULL,
     @TagRfid VARCHAR(100) = NULL,
+    @InvoiceNo VARCHAR(50) = NULL,
     @ReceiverName NVARCHAR(100) = NULL,
     @TotalQuantity INT = NULL,
     @Remark NVARCHAR(500) = NULL,
@@ -730,7 +770,9 @@ BEGIN
             CustomerId,
             VehicleId,
             DriverName,
+            DriverPhone,
             TagRfid,
+            InvoiceNo,
             ReceiverName,
             TotalQuantity,
             Remark,
@@ -744,7 +786,9 @@ BEGIN
             @CustomerId,
             @VehicleId,
             @DriverName,
+            @DriverPhone,
             @TagRfid,
+            @InvoiceNo,
             @ReceiverName,
             @TotalQuantity,
             @Remark,
@@ -763,7 +807,9 @@ BEGIN
             CustomerId = @CustomerId,
             VehicleId = @VehicleId,
             DriverName = @DriverName,
+            DriverPhone = @DriverPhone,
             TagRfid = @TagRfid,
+            InvoiceNo = @InvoiceNo,
             ReceiverName = @ReceiverName,
             TotalQuantity = @TotalQuantity,
             Remark = @Remark,

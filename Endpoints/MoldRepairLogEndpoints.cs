@@ -47,6 +47,7 @@ public static class MoldRepairLogEndpoints
             SqlParameterHelper.NullableString("Solution", body),
             SqlParameterHelper.NullableString("Vendor", body),
             SqlParameterHelper.NullableString("RepairPersonIds", body),
+            SqlParameterHelper.NullableString("StageName", body),
             SqlParameterHelper.NullableDateTime("StartDate", body),
             SqlParameterHelper.NullableDateTime("EndDate", body),
             SqlParameterHelper.NullableString("Result", body),

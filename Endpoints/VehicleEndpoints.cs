@@ -66,6 +66,7 @@ public static class VehicleEndpoints
             SqlParameterHelper.NullableInt("UserId", body, 0),
             SqlParameterHelper.String("VehicleNo", body),
             SqlParameterHelper.NullableString("DefaultDriverName", body),
+            SqlParameterHelper.NullableString("DefaultDriverPhone", body),
             SqlParameterHelper.NullableDecimal("LoadCapacity", body),
             SqlParameterHelper.NullableString("TagRfid", body),
             SqlParameterHelper.NullableBool("IsActive", body)

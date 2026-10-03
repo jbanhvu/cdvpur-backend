@@ -37,6 +37,15 @@ public class UserRepository : BaseRepository
             parameters);
     }
 
+    public async Task<List<Dictionary<string, object?>>> UpdateAvatarAsync(int id, string avatarUrl, int? updatedBy)
+    {
+        return await ExecuteStoredProcedureAsync(
+            "CDV_User_UpdateAvatar",
+            new SqlParameter("@Id", id),
+            new SqlParameter("@AvatarUrl", avatarUrl),
+            new SqlParameter("@UpdatedBy", (object?)updatedBy ?? DBNull.Value));
+    }
+
     public async Task<List<Dictionary<string, object?>>> LoginAsync(params SqlParameter[] parameters)
     {
         return await ExecuteStoredProcedureAsync(

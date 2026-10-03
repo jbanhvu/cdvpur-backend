@@ -12,6 +12,13 @@ BEGIN
 END
 GO
 
+IF COL_LENGTH(N'nhvpa3en_vpa01.CDV_Vehicle', N'DefaultDriverPhone') IS NULL
+BEGIN
+    ALTER TABLE [nhvpa3en_vpa01].[CDV_Vehicle]
+    ADD [DefaultDriverPhone] VARCHAR(20) NULL;
+END
+GO
+
 IF OBJECT_ID(N'[nhvpa3en_vpa01].[CDV_Vehicle_BulkUpsert]', N'P') IS NULL
     EXEC(N'CREATE PROCEDURE [nhvpa3en_vpa01].[CDV_Vehicle_BulkUpsert] AS BEGIN SET NOCOUNT ON; END');
 GO
@@ -39,6 +46,7 @@ BEGIN
         (
             VehicleNo VARCHAR(50) NOT NULL,
             DefaultDriverName NVARCHAR(100) NULL,
+            DefaultDriverPhone VARCHAR(20) NULL,
             LoadCapacity DECIMAL(5,1) NULL,
             TagRfid VARCHAR(100) NULL,
             IsActive BIT NULL
@@ -48,6 +56,7 @@ BEGIN
         (
             VehicleNo,
             DefaultDriverName,
+            DefaultDriverPhone,
             LoadCapacity,
             TagRfid,
             IsActive
@@ -60,6 +69,10 @@ BEGIN
             COALESCE(
                 JSON_VALUE([value], '$.defaultDriverName'),
                 JSON_VALUE([value], '$.DefaultDriverName')
+            ),
+            COALESCE(
+                JSON_VALUE([value], '$.defaultDriverPhone'),
+                JSON_VALUE([value], '$.DefaultDriverPhone')
             ),
             COALESCE(
                 TRY_CONVERT(DECIMAL(5,1), JSON_VALUE([value], '$.loadCapacity')),
@@ -107,6 +120,7 @@ BEGIN
         UPDATE target
         SET
             DefaultDriverName = source.DefaultDriverName,
+            DefaultDriverPhone = source.DefaultDriverPhone,
             LoadCapacity = source.LoadCapacity,
             TagRfid = source.TagRfid,
             IsActive = ISNULL(source.IsActive, target.IsActive)
@@ -118,6 +132,7 @@ BEGIN
         (
             VehicleNo,
             DefaultDriverName,
+            DefaultDriverPhone,
             LoadCapacity,
             TagRfid,
             IsActive
@@ -126,6 +141,7 @@ BEGIN
         SELECT
             source.VehicleNo,
             source.DefaultDriverName,
+            source.DefaultDriverPhone,
             source.LoadCapacity,
             source.TagRfid,
             ISNULL(source.IsActive, 1)

@@ -1,10 +1,12 @@
-using ChangdaeVinaPurchasingApi.Contracts;
+﻿using ChangdaeVinaPurchasingApi.Contracts;
 using ChangdaeVinaPurchasingApi.Endpoints;
 using ChangdaeVinaPurchasingApi.Models;
 using ChangdaeVinaPurchasingApi.Models.NaverWorks;
+using ChangdaeVinaPurchasingApi.Models.Adsun;
 using ChangdaeVinaPurchasingApi.Repositories;
 using ChangdaeVinaPurchasingApi.Services;
 using ChangdaeVinaPurchasingApi.Services.NaverWorks;
+using ChangdaeVinaPurchasingApi.Services.Adsun;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 
@@ -22,6 +24,8 @@ builder.Services.Configure<GoogleDriveOptions>(
     builder.Configuration.GetSection("GoogleDrive"));
 builder.Services.Configure<NaverWorksOptions>(
     builder.Configuration.GetSection("NaverWorks"));
+builder.Services.Configure<AdsunOptions>(
+    builder.Configuration.GetSection("Adsun"));
 
 try
 {
@@ -135,6 +139,7 @@ builder.Services.AddScoped<UnitRepository>();
 builder.Services.AddScoped<UserFCMTokenRepository>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<VehicleRepository>();
+builder.Services.AddScoped<VehicleGpsLogRepository>();
 builder.Services.AddScoped<FirebaseNotificationService>();
 builder.Services.AddScoped<IGoogleDriveService, GoogleDriveService>();
 builder.Services.AddScoped<HikvisionAttendanceService>();
@@ -142,6 +147,8 @@ builder.Services.AddScoped<NaverWorksAuthService>();
 builder.Services.AddScoped<NaverWorksApprovalService>();
 builder.Services.AddScoped<NaverWorksSyncService>();
 builder.Services.AddScoped<RoleFunctionPermissionService>();
+builder.Services.AddHttpClient<IAdsunService, AdsunService>();
+builder.Services.AddHostedService<AdsunGpsSyncBackgroundService>();
 
 builder.Services.AddCors(options =>
 {
@@ -210,6 +217,7 @@ app.MapMethods("/{*path}", ["OPTIONS"], () => Results.NoContent())
 app.MapBishopEndpoints();
 app.MapProvinceEndpoints();
 app.MapAttendanceEndpoints();
+app.MapAdsunGpsEndpoints();
 app.MapApprovalActionHistoryEndpoints();
 app.MapApprovalWorkflowStepEndpoints();
 app.MapAuditLogEndpoints();
@@ -312,3 +320,4 @@ static bool IsAllowedCorsOrigin(string? origin)
         uri.Host.Equals("changdaevina.com", StringComparison.OrdinalIgnoreCase) ||
         uri.Host.EndsWith(".changdaevina.com", StringComparison.OrdinalIgnoreCase);
 }
+

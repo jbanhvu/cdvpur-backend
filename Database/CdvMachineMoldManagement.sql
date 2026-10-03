@@ -83,6 +83,13 @@ IF OBJECT_ID(N'[dbo].[CDV_Machine_Select]', N'P') IS NULL
     EXEC(N'CREATE PROCEDURE [dbo].[CDV_Machine_Select] AS BEGIN SET NOCOUNT ON; END');
 GO
 
+IF COL_LENGTH(N'dbo.CDV_Machine', N'DefaultStageName') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[CDV_Machine]
+    ADD [DefaultStageName] NVARCHAR(100) NULL;
+END;
+GO
+
 ALTER PROCEDURE [dbo].[CDV_Machine_Select]
 (
     @MachineId INT = NULL,
@@ -117,6 +124,7 @@ ALTER PROCEDURE [dbo].[CDV_Machine_Upsert]
     @MachineCode VARCHAR(30),
     @MachineName NVARCHAR(100),
     @MachineGroup NVARCHAR(100) = NULL,
+    @DefaultStageName NVARCHAR(100) = NULL,
     @IsActive BIT = 1,
     @Note NVARCHAR(500) = NULL,
     @UserId VARCHAR(50) = NULL
@@ -147,6 +155,7 @@ BEGIN
             MachineCode,
             MachineName,
             MachineGroup,
+            DefaultStageName,
             IsActive,
             Note,
             CreatedBy
@@ -156,6 +165,7 @@ BEGIN
             @MachineCode,
             @MachineName,
             @MachineGroup,
+            @DefaultStageName,
             ISNULL(@IsActive, 1),
             @Note,
             @UserId
@@ -170,6 +180,7 @@ BEGIN
             MachineCode = @MachineCode,
             MachineName = @MachineName,
             MachineGroup = @MachineGroup,
+            DefaultStageName = @DefaultStageName,
             IsActive = ISNULL(@IsActive, IsActive),
             Note = @Note,
             UpdatedBy = @UserId,
@@ -374,6 +385,13 @@ IF OBJECT_ID(N'[dbo].[CDV_MachineOperation_Select]', N'P') IS NULL
     EXEC(N'CREATE PROCEDURE [dbo].[CDV_MachineOperation_Select] AS BEGIN SET NOCOUNT ON; END');
 GO
 
+IF COL_LENGTH(N'dbo.CDV_MachineOperationLog', N'StageName') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[CDV_MachineOperationLog]
+    ADD [StageName] NVARCHAR(100) NULL;
+END;
+GO
+
 ALTER PROCEDURE [dbo].[CDV_MachineOperation_Select]
 (
     @OperationLogId BIGINT = NULL,
@@ -403,6 +421,7 @@ BEGIN
         m.MachineName,
         l.StartTime,
         l.EndTime,
+        l.StageName,
         l.StatusCode,
         s.StatusName,
         s.ColorHex,
@@ -447,6 +466,7 @@ ALTER PROCEDURE [dbo].[CDV_MachineOperation_Upsert]
     @MachineId INT,
     @StartTime DATETIME2(0),
     @EndTime DATETIME2(0),
+    @StageName NVARCHAR(100) = NULL,
     @StatusCode VARCHAR(30),
     @MoldId INT = NULL,
     @Note NVARCHAR(1000) = NULL,
@@ -498,6 +518,7 @@ BEGIN
             MachineId,
             StartTime,
             EndTime,
+            StageName,
             StatusCode,
             MoldId,
             Note,
@@ -511,6 +532,7 @@ BEGIN
             @MachineId,
             @StartTime,
             @EndTime,
+            @StageName,
             @StatusCode,
             @MoldId,
             @Note,
@@ -529,6 +551,7 @@ BEGIN
             MachineId = @MachineId,
             StartTime = @StartTime,
             EndTime = @EndTime,
+            StageName = @StageName,
             StatusCode = @StatusCode,
             MoldId = @MoldId,
             Note = @Note,

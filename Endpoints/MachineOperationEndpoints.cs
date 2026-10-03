@@ -105,6 +105,7 @@ public static class MachineOperationEndpoints
             SqlParameterHelper.Int("MachineId", body),
             SqlParameterHelper.DateTime("StartTime", body),
             SqlParameterHelper.DateTime("EndTime", body),
+            SqlParameterHelper.NullableString("StageName", body),
             SqlParameterHelper.String("StatusCode", body),
             SqlParameterHelper.NullableInt("MoldId", body),
             SqlParameterHelper.NullableString("Note", body),

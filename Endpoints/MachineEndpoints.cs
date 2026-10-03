@@ -53,6 +53,7 @@ public static class MachineEndpoints
             SqlParameterHelper.String("MachineCode", body),
             SqlParameterHelper.String("MachineName", body),
             SqlParameterHelper.NullableString("MachineGroup", body),
+            SqlParameterHelper.NullableString("DefaultStageName", body),
             SqlParameterHelper.NullableBool("IsActive", body),
             SqlParameterHelper.NullableString("Note", body),
             SqlParameterHelper.NullableString("UserId", body)

@@ -15,6 +15,9 @@ IF OBJECT_ID(N'[nhvpa3en_vpa01].[CK_CDV_MoldRepairLog_Dates]', N'C') IS NULL
     ADD CONSTRAINT [CK_CDV_MoldRepairLog_Dates]
     CHECK ([StartDate] IS NULL OR [EndDate] IS NULL OR [EndDate] >= [StartDate]);
 GO
+IF COL_LENGTH(N'[nhvpa3en_vpa01].[CDV_MoldRepairLog]', 'StageName') IS NULL
+    ALTER TABLE [nhvpa3en_vpa01].[CDV_MoldRepairLog] ADD [StageName] NVARCHAR(100) NULL;
+GO
 ALTER PROCEDURE [nhvpa3en_vpa01].[CDV_MoldRepairLog_Select]
     @Id INT = -1
 AS
@@ -30,6 +33,7 @@ BEGIN
         l.Solution,
         l.Vendor,
         l.RepairPersonIds,
+        l.StageName,
         l.StartDate,
         l.EndDate,
         l.Result,
@@ -55,6 +59,7 @@ ALTER PROCEDURE [nhvpa3en_vpa01].[CDV_MoldRepairLog_Upsert]
     @Solution NVARCHAR(MAX) = NULL,
     @Vendor NVARCHAR(200) = NULL,
     @RepairPersonIds NVARCHAR(500) = NULL,
+    @StageName NVARCHAR(100) = NULL,
     @StartDate DATETIME = NULL,
     @EndDate DATETIME = NULL,
     @Result NVARCHAR(MAX) = NULL,
@@ -74,6 +79,7 @@ BEGIN
             Solution,
             Vendor,
             RepairPersonIds,
+            StageName,
             StartDate,
             EndDate,
             Result,
@@ -88,6 +94,7 @@ BEGIN
             @Solution,
             @Vendor,
             @RepairPersonIds,
+            @StageName,
             @StartDate,
             @EndDate,
             @Result,
@@ -107,6 +114,7 @@ BEGIN
             Solution = @Solution,
             Vendor = @Vendor,
             RepairPersonIds = @RepairPersonIds,
+            StageName = @StageName,
             StartDate = @StartDate,
             EndDate = @EndDate,
             Result = @Result,
